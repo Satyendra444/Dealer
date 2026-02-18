@@ -182,8 +182,8 @@ export const FAQ_TAGS: CacheTagConfig[] = [
 // ──────────────────────────────────────────────────────────────────────
 export const SEO_TAGS: CacheTagConfig[] = [
     {
-        label: 'SEO — home 91infra.com',
-        tag: 'seo-home:91infra.com',
+        label: 'SEO — home 91trucks.com',
+        tag: 'seo-home:91trucks.com',
         endpoints: [
             '/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in',
         ],

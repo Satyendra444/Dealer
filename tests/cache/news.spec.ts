@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { NEWS_TAGS } from '../../src/data/cache-tags';
 import {
-    invalidateCache,
+    invalidateAndVerifyDeletion,
     verifyNoUnrelatedKeysDeleted,
     getSpotCheckEndpoints,
     callAndSnapshot,
@@ -29,11 +29,10 @@ test.describe('📰 News — Cache Invalidation', () => {
                     logger.pass(`Pre-check OK: ${check.label}`);
                 }
 
-                // ── STEP 2: Call Invalidate API ──
-                logger.separator('STEP 2 — Call Invalidate API');
-                const invalidation = await invalidateCache(request, config.tag);
-                expect(invalidation.status, 'Invalidation should return 200').toBe(200);
-                logger.pass(`Invalidation returned status ${invalidation.status}`);
+                // ── STEP 2: Call Invalidate API (double-call: deletedKeys > 0, then 0) ──
+                logger.separator('STEP 2 — Call Invalidate API & Verify deletedKeys');
+                const invalidation = await invalidateAndVerifyDeletion(request, config.tag);
+                logger.pass(`Invalidation verified — 1st call deleted keys, 2nd call deleted 0`);
 
                 // ── STEP 3: Verify no unrelated keys deleted ──
                 logger.separator('STEP 3 — Verify No Unrelated Keys Deleted');

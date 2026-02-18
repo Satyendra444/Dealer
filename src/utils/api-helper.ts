@@ -13,6 +13,18 @@ export interface ApiSnapshot {
     headers: Record<string, string>;
 }
 
+/** Shape returned by the invalidation API */
+export interface InvalidationResponse {
+    status: number;
+    body: {
+        success?: boolean;
+        tags?: string[];
+        deletedKeys?: number;
+        [key: string]: unknown;
+    };
+    durationMs: number;
+}
+
 /**
  * Call an API endpoint and return a full snapshot of the response.
  */
@@ -86,11 +98,12 @@ export async function saveExistingResponse(
 
 /**
  * Call the invalidation endpoint for the given tag(s).
+ * Returns parsed response including { success, tags, deletedKeys }.
  */
 export async function invalidateCache(
     request: APIRequestContext,
     tags: string,
-): Promise<{ status: number; body: unknown; durationMs: number }> {
+): Promise<InvalidationResponse> {
     const url = `${INVALIDATE_BASE}?tags=${encodeURIComponent(tags)}`;
     logger.step(`Invalidating cache → tags="${tags}"`);
 
@@ -99,22 +112,67 @@ export async function invalidateCache(
     const durationMs = Date.now() - start;
     const status = response.status();
 
-    let body: unknown;
+    let body: Record<string, unknown> = {};
     try {
         body = await response.json();
     } catch {
-        body = await response.text();
+        const text = await response.text();
+        body = { raw: text };
     }
 
-    logger.api(`INVALIDATE tags="${tags}"`, { status, durationMs });
+    const deletedKeys = typeof body.deletedKeys === 'number' ? body.deletedKeys : undefined;
+
+    logger.api(`INVALIDATE tags="${tags}"`, { status, durationMs, deletedKeys });
 
     if (status === 200) {
-        logger.pass(`Invalidation succeeded (${durationMs}ms)`);
+        logger.pass(`Invalidation succeeded (${durationMs}ms) — deletedKeys: ${deletedKeys ?? 'N/A'}`);
     } else {
         logger.fail(`Invalidation returned status ${status}`, body);
     }
 
     return { status, body, durationMs };
+}
+
+/**
+ * Double-call invalidation pattern:
+ *   1st call → asserts deletedKeys > 0  (keys were actually purged)
+ *   2nd call → asserts deletedKeys === 0 (no keys left to delete)
+ *
+ * This proves the invalidation API is truly deleting cached keys.
+ */
+export async function invalidateAndVerifyDeletion(
+    request: APIRequestContext,
+    tags: string,
+): Promise<InvalidationResponse> {
+    // ── First invalidation: should delete keys ──
+    logger.step(`1st invalidation → expecting deletedKeys > 0`);
+    const first = await invalidateCache(request, tags);
+    expect(first.status, 'First invalidation should return 200').toBe(200);
+    expect(first.body.success, 'First invalidation should return success: true').toBe(true);
+
+    const firstDeleted = first.body.deletedKeys;
+    if (typeof firstDeleted === 'number') {
+        expect(firstDeleted, `First invalidation for "${tags}" should delete at least 1 key (got ${firstDeleted})`).toBeGreaterThan(0);
+        logger.pass(`1st invalidation: deletedKeys = ${firstDeleted} ✅ (keys were purged)`);
+    } else {
+        logger.warn(`1st invalidation: deletedKeys not present in response — skipping count assertion`);
+    }
+
+    // ── Second invalidation: should delete 0 keys ──
+    logger.step(`2nd invalidation → expecting deletedKeys === 0`);
+    const second = await invalidateCache(request, tags);
+    expect(second.status, 'Second invalidation should return 200').toBe(200);
+    expect(second.body.success, 'Second invalidation should return success: true').toBe(true);
+
+    const secondDeleted = second.body.deletedKeys;
+    if (typeof secondDeleted === 'number') {
+        expect(secondDeleted, `Second invalidation for "${tags}" should delete 0 keys (got ${secondDeleted})`).toBe(0);
+        logger.pass(`2nd invalidation: deletedKeys = ${secondDeleted} ✅ (no keys left)`);
+    } else {
+        logger.warn(`2nd invalidation: deletedKeys not present in response — skipping count assertion`);
+    }
+
+    return first; // Return the first (meaningful) invalidation result
 }
 
 /**

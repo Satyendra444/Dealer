@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import {
     invalidateCache,
+    invalidateAndVerifyDeletion,
     callAndSnapshot,
     warmCache,
     getSpotCheckEndpoints,
@@ -43,6 +44,13 @@ test.describe('🚫 Negative Tests — Cache Invalidation', () => {
 
             // Should not crash (no 500)
             expect(invalidation.status, 'Server should not crash on invalid tag').not.toBe(500);
+
+            // deletedKeys should be 0 for invalid tag
+            const deleted = invalidation.body.deletedKeys;
+            if (typeof deleted === 'number') {
+                expect(deleted, 'Invalid tag should delete 0 keys').toBe(0);
+                logger.pass(`deletedKeys = ${deleted} ✅ (no keys deleted for invalid tag)`);
+            }
             logger.pass('No server crash — status is not 500');
 
             // Step 3: Verify no keys were deleted
@@ -85,11 +93,10 @@ test.describe('🚫 Negative Tests — Cache Invalidation', () => {
             expect(brandSnap.status).toBe(200);
             logger.pass('Brand snapshot saved');
 
-            // Step 4: Invalidate both tags at once
-            logger.separator('STEP 4 — Invalidate tags "bank,category"');
-            const invalidation = await invalidateCache(request, 'bank,category');
-            expect(invalidation.status, 'Multi-tag invalidation should return 200').toBe(200);
-            logger.pass(`Invalidation succeeded — status ${invalidation.status}`);
+            // Step 4: Invalidate both tags at once (double-call: deletedKeys > 0, then 0)
+            logger.separator('STEP 4 — Invalidate tags "bank,category" & Verify deletedKeys');
+            const invalidation = await invalidateAndVerifyDeletion(request, 'bank,category');
+            logger.pass(`Multi-tag invalidation verified — 1st call deleted keys, 2nd call deleted 0`);
 
             // Step 5: Verify both modules still return correct data (cache rebuilt)
             logger.separator('STEP 5 — Verify bank & category return correct data');
@@ -130,11 +137,10 @@ test.describe('🚫 Negative Tests — Cache Invalidation', () => {
             expect(cachedSnap.status).toBe(200);
             logger.pass(`Cached response saved (${cachedSnap.durationMs}ms)`);
 
-            // Step 3: Invalidate the cache
-            logger.separator('STEP 3 — Invalidate cache');
-            const invalidation = await invalidateCache(request, 'bank');
-            expect(invalidation.status).toBe(200);
-            logger.pass('Cache invalidated');
+            // Step 3: Invalidate the cache (double-call: deletedKeys > 0, then 0)
+            logger.separator('STEP 3 — Invalidate cache & Verify deletedKeys');
+            const invalidation = await invalidateAndVerifyDeletion(request, 'bank');
+            logger.pass('Cache invalidated — deletedKeys validation passed');
 
             // Step 4: Rapidly call the API multiple times to ensure no stale data is served
             logger.separator('STEP 4 — Rapid consecutive calls to detect stale data');

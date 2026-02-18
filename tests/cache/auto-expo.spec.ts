@@ -3,7 +3,7 @@ import { AUTO_EXPO_TAGS } from '../../src/data/cache-tags';
 import {
     warmCache,
     saveExistingResponse,
-    invalidateCache,
+    invalidateAndVerifyDeletion,
     verifyCacheRebuilt,
     verifyNoUnrelatedKeysDeleted,
     getSpotCheckEndpoints,
@@ -31,11 +31,10 @@ test.describe('🎪 Auto-Expo — Cache Invalidation', () => {
                     logger.info(`Cached response: ${snap.url} → ${snap.durationMs}ms`);
                 }
 
-                // ── STEP 3: Call Invalidate API ──
-                logger.separator('STEP 3 — Call Invalidate API');
-                const invalidation = await invalidateCache(request, config.tag);
-                expect(invalidation.status, 'Invalidation should return 200').toBe(200);
-                logger.pass(`Invalidation returned status ${invalidation.status}`);
+                // ── STEP 3: Call Invalidate API (double-call: deletedKeys > 0, then 0) ──
+                logger.separator('STEP 3 — Call Invalidate API & Verify deletedKeys');
+                const invalidation = await invalidateAndVerifyDeletion(request, config.tag);
+                logger.pass(`Invalidation verified — 1st call deleted keys, 2nd call deleted 0`);
 
                 // ── STEP 4: Verify keys deleted (indirect) ──
                 logger.separator('STEP 4 — Verify Keys Deleted (Indirect)');
