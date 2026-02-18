@@ -79,30 +79,227 @@ Every tag test follows this exact flow:
 
 ---
 
-## 🔗 Key API Endpoints
+## 🧪 Manual Testing Reference — All Tags (Invalidation + Functional API)
 
-| Purpose | URL |
-|---------|-----|
-| **Invalidate cache** | `GET /v1/internal/cache/invalidate?tags=<tag>` |
-| Bank list | `GET /v1/bank/index` |
-| Bank detail | `GET /v1/bank/detail?slug=hdfc-bank` |
-| Categories | `GET /v1/categories?domain=91trucks.com` |
-| Category detail | `GET /v1/category/detail?langCode=en&slug=trucks` |
-| Brands | `GET /v1/brands?categorySlug=trucks&langCode=en` |
-| Brand detail | `GET /v1/brand/detail?langCode=en&categorySlug=trucks&slug=tata` |
-| Banners | `GET /v1/banners?_format=json&categorySlug=trucks` |
-| Cities | `GET /v1/cities?_format=json&langCode=en` |
-| City detail | `GET /v1/city/detail?slug=jaipur&langCode=en` |
-| EV charging | `GET /v1/city/electric-charging-station?slug=jaipur` |
-| Dealers | `GET /v1/dealers?categorySlug=trucks&langCode=en&brandSlug=tata&citySlug=new-delhi` |
-| FAQs | `GET /v1/faqs?categorySlug=trucks&langCode=en&page=category` |
-| SEO | `GET /v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in` |
-| Navigation | `GET /v1/site/site-navigation-menu?slug=91trucks.com` |
-| Rating | `GET /v1/rating/types?categorySlug=trucks` |
-| QnA | `GET /v1/question/qna-by-category-and-search-keys?categorySlug=trucks&langCode=en&searchKey=trucks\|model` |
-| Departments | `GET /v1/departments?_format=json` |
-| Auto-Expo | `GET /v1/site/autoexpo-updates` |
-| States | `GET /v1/city/state-list?langCode=en` |
+> For each tag: **first call the Functional API** to warm the cache, then **call the Invalidation API** to purge it, then call the Functional API again to verify rebuild.
+
+---
+
+### 🏦 BANK
+
+**Tag: `bank`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=bank
+- Functional: https://devtez.91trucks.com/v1/bank/index
+- Functional: https://devtez.91trucks.com/v1/bank/detail?slug=hdfc-bank
+
+---
+
+### 🖼️ BANNER
+
+**Tag: `banner:construction-equipments`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=banner:construction-equipments
+- Functional: https://devtez.91trucks.com/v1/banners?_format=json&categorySlug=construction-equipments
+
+---
+
+### 🏷️ BRAND
+
+**Tag: `brand:trucks-tata`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=brand:trucks-tata
+- Functional: https://devtez.91trucks.com/v1/brand/detail?langCode=en&categorySlug=trucks&slug=tata
+
+**Tag: `brand:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=brand:trucks
+- Functional: https://devtez.91trucks.com/v1/brands?categorySlug=trucks&langCode=en
+
+**Tag: `brand-category-dealer:8-in`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=brand-category-dealer:8-in
+- Functional: https://devtez.91trucks.com/v1/brands?categorySlug=trucks&langCode=en
+
+---
+
+### 📂 CATEGORY
+
+**Tag: `category`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=category
+- Functional: https://devtez.91trucks.com/v1/categories?domain=91trucks.com
+
+**Tag: `category:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=category:trucks
+- Functional: https://devtez.91trucks.com/v1/category/detail?langCode=en&slug=trucks
+
+**Tag: `category-domain:91trucks.com`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=category-domain:91trucks.com
+- Functional: https://devtez.91trucks.com/v1/categories?domain=91trucks.com
+
+---
+
+### 🏙️ CITY
+
+**Tag: `city`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=city
+- Functional: https://devtez.91trucks.com/v1/cities?_format=json&langCode=en
+- Functional: https://devtez.91trucks.com/v1/cities?is_popular=1
+
+**Tag: `city:datia`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=city:datia
+- Functional: https://devtez.91trucks.com/v1/city/detail?slug=datia&langCode=en
+
+**Tag: `city-state:2`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=city-state:2
+- Functional: https://devtez.91trucks.com/v1/city/cities-by-state?stateId=2
+
+**Tag: `ev_charging_station:jaipur`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=ev_charging_station:jaipur
+- Functional: https://devtez.91trucks.com/v1/city/electric-charging-station?slug=jaipur
+
+---
+
+### 🏪 DEALER
+
+**Tag: `dealer-category-brand-city:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=dealer-category-brand-city:trucks
+- Functional: https://devtez.91trucks.com/v1/dealers?categorySlug=trucks&langCode=en&brandSlug=tata&citySlug=new-delhi&page=1&per-page=10
+
+**Tag: `dealer-brand-city:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=dealer-brand-city:trucks
+- Functional: https://devtez.91trucks.com/v1/dealers?categorySlug=trucks&langCode=en&brandSlug=tata&citySlug=new-delhi&page=1&per-page=10
+
+**Tag: `dealer-city:trucks-ashok-leyland`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=dealer-city:trucks-ashok-leyland
+- Functional: https://devtez.91trucks.com/v1/dealers?categorySlug=trucks&langCode=en&brandSlug=ashok-leyland&citySlug=new-delhi&page=1&per-page=10
+
+---
+
+### ❓ FAQ
+
+**Tag: `faq-category:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=faq-category:trucks
+- Functional: https://devtez.91trucks.com/v1/faqs?categorySlug=trucks&langCode=en&page=category
+
+**Tag: `faq-model:7-1178`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=faq-model:7-1178
+- Functional: https://devtez.91trucks.com/v1/faqs?categorySlug=trucks&langCode=en&page=category
+
+---
+
+### 🔍 SEO (Very Important)
+
+**Tag: `seo-home:91infra.com`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-home:91trucks.com
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-category:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-category:trucks
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-variant:trucks-ashok-leyland-dost-ls`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-variant:trucks-ashok-leyland-dost-ls
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-model:1510`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-model:1510
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-dealer:trucks`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-dealer:trucks
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-static-page:91trucks.com-privacy-policy`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-static-page:91trucks.com-privacy-policy
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+**Tag: `seo-filter`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=seo-filter
+- Functional: https://devtez.91trucks.com/v1/seo/category?categorySlug=trucks&langCode=en&countryCode=in
+
+---
+
+### 📰 NEWS
+
+**Tag: `news-wp_users-wp_usermeta:16`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=news-wp_users-wp_usermeta:16
+- Functional: _(no direct functional endpoint available)_
+
+**Tag: `news-wp_postmeta:construction-equipments-30`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=news-wp_postmeta:construction-equipments-30
+- Functional: _(no direct functional endpoint available)_
+
+**Tag: `news-wp_posts:91trucks.com-ashok-leyland-saathi`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=news-wp_posts:91trucks.com-ashok-leyland-saathi
+- Functional: _(no direct functional endpoint available)_
+
+**Tag: `news-wp_posts-wp_postmeta:91trucks.com-truck`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=news-wp_posts-wp_postmeta:91trucks.com-truck
+- Functional: _(no direct functional endpoint available)_
+
+---
+
+### 🏬 STORE
+
+**Tag: `store-inventory:all`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=store-inventory:all
+- Functional: _(no direct functional endpoint available)_
+
+---
+
+### 🧭 NAVIGATION
+
+**Tag: `navigation`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=navigation
+- Functional: https://devtez.91trucks.com/v1/site/site-navigation-menu?slug=91trucks.com
+
+---
+
+### ⭐ RATING
+
+**Tag: `rating`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=rating
+- Functional: https://devtez.91trucks.com/v1/rating/types?categorySlug=trucks
+- Functional: https://devtez.91trucks.com/v1/rating/index?&categorySlug=trucks&_format=json
+
+---
+
+### 💬 QNA
+
+**Tag: `qna`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=qna
+- Functional: https://devtez.91trucks.com/v1/question/qna-by-category-and-search-keys?categorySlug=trucks&langCode=en&searchKey=trucks|model
+
+---
+
+### 💼 CAREERS
+
+**Tag: `careers`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=careers
+- Functional: https://devtez.91trucks.com/v1/departments?_format=json
+- Functional: https://devtez.91trucks.com/v1/department/role?_format=json&countryCode=in&departmentId=5
+
+---
+
+### 🎪 AUTO-EXPO
+
+**Tag: `auto-expo`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=auto-expo
+- Functional: https://devtez.91trucks.com/v1/site/autoexpo-updates
+
+---
+
+### 📍 STATE
+
+**Tag: `state`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=state
+- Functional: https://devtez.91trucks.com/v1/state/list?langCode=en
+- Functional: https://devtez.91trucks.com/v1/state/ev-state-wise-unit-price
+
+---
+
+### 🚫 NEGATIVE (Multi-tag example)
+
+**Tags: `bank,category`**
+- Invalidate: https://devtez.91trucks.com/v1/internal/cache/invalidate?tags=bank,category
+- Functional (bank): https://devtez.91trucks.com/v1/bank/index
+- Functional (category): https://devtez.91trucks.com/v1/categories?domain=91trucks.com
 
 ---
 
