@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { NEWS_TAGS } from '../../src/data/cache-tags';
+import { COMPARE_TAGS } from '../../src/data/cache-tags';
 import {
     warmCache,
     saveExistingResponse,
@@ -10,12 +10,12 @@ import {
 } from '../../src/utils/api-helper';
 import { logger } from '../../src/utils/logger';
 
-test.describe('📰 News — Cache Invalidation', () => {
-    for (const config of NEWS_TAGS) {
+test.describe('⚖️ Compare — Cache Invalidation', () => {
+    for (const config of COMPARE_TAGS) {
         test.describe(config.label, () => {
 
             test(`Full cache lifecycle for tag="${config.tag}"`, async ({ request }) => {
-                logger.banner(`NEWS CACHE TEST — ${config.label}`);
+                logger.banner(`COMPARE CACHE TEST — ${config.label}`);
 
                 // ── STEP 1: Warm the cache ──
                 logger.separator('STEP 1 — Warm the Cache');
@@ -47,11 +47,11 @@ test.describe('📰 News — Cache Invalidation', () => {
 
                 // ── STEP 6: Verify no unrelated keys deleted ──
                 logger.separator('STEP 6 — Verify No Unrelated Keys Deleted');
-                const spotChecks = getSpotCheckEndpoints('news');
-                await verifyNoUnrelatedKeysDeleted(request, 'news', spotChecks);
+                const spotChecks = getSpotCheckEndpoints('compare');
+                await verifyNoUnrelatedKeysDeleted(request, 'compare', spotChecks);
                 logger.pass('No unrelated keys affected');
 
-                logger.banner('NEWS CACHE TEST — PASSED ✅');
+                logger.banner('COMPARE CACHE TEST — PASSED ✅');
             });
 
         });

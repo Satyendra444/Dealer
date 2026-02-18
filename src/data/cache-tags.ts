@@ -383,7 +383,7 @@ export const CITY_TAGS: CacheTagConfig[] = [
     },
     {
         label: 'City — EV charging station jaipur',
-        tag: 'ev_charging_station:jaipur',
+        tag: 'ev_charging_station:new-delhi',
         endpoints: [
             '/v1/city/electric-charging-station?slug=new-delhi',
         ],
@@ -470,8 +470,15 @@ export const STORE_TAGS: CacheTagConfig[] = [
 // ──────────────────────────────────────────────────────────────────────
 export const COMPARE_TAGS: CacheTagConfig[] = [
     {
-        label: 'Compare — bolero-pickup vs tata-407-gold-29wb',
+        label: 'Compare — bolero-pickup vs tata-407-gold-29wb (model tag)',
         tag: 'compare:model-bolero-pickup:model-tata-407-gold-29wb',
+        endpoints: [
+            '/v1/compare/index?compareString=mahindra-bolero-pickup-vs-tata-tata-407-gold-29wb&categorySlug=trucks&langCode=en&variants=&countryCode=in',
+        ],
+    },
+    {
+        label: 'Compare — models-trucks bolero-pickup vs tata-407-gold-29wb (redis key)',
+        tag: 'compare:models-trucks-mahindra-bolero-pickup-vs-tata-tata-407-gold-29wb-en-in',
         endpoints: [
             '/v1/compare/index?compareString=mahindra-bolero-pickup-vs-tata-tata-407-gold-29wb&categorySlug=trucks&langCode=en&variants=&countryCode=in',
         ],

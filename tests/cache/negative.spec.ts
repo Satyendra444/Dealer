@@ -75,7 +75,7 @@ test.describe('🚫 Negative Tests — Cache Invalidation', () => {
             // Step 1: Warm both bank and category caches
             logger.separator('STEP 1 — Warm caches for both bank and category');
             const bankEndpoints = ['/v1/bank/index'];
-            const categoryEndpoints = ['/v1/categories?domain=91trucks.com'];
+            const categoryEndpoints = ['/v1/categories'];
             await warmCache(request, bankEndpoints);
             await warmCache(request, categoryEndpoints);
 

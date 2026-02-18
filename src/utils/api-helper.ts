@@ -242,10 +242,10 @@ export function getSpotCheckEndpoints(excludeModule: string): { path: string; la
     const allChecks: Record<string, { path: string; label: string }> = {
         bank: { path: '/v1/bank/index', label: 'Bank list' },
         category: { path: '/v1/categories?domain=91trucks.com', label: 'Category list' },
-        brand: { path: '/v1/brands?categorySlug=trucks&langCode=en', label: 'Brand list' },
-        city: { path: '/v1/cities?is_popular=1', label: 'Popular cities' },
-        banner: { path: '/v1/banners?_format=json&categorySlug=trucks', label: 'Banner trucks' },
-        faq: { path: '/v1/faqs?categorySlug=trucks&langCode=en&page=category', label: 'FAQ trucks' },
+        brand: { path: '/v1/brands?categorySlug=trucks&langCode=en&limit=0&countryCode=in', label: 'Brand list' },
+        city: { path: '/v1/cities?is_popular=1&countryCode=in', label: 'Popular cities' },
+        banner: { path: '/v1/banners?_format=json&categorySlug=construction-equipments&countryCode=in', label: 'Banner construction' },
+        faq: { path: '/v1/faqs?categorySlug=trucks&langCode=en&page=category&countryCode=in', label: 'FAQ trucks' },
         navigation: { path: '/v1/site/site-navigation-menu?slug=91trucks.com', label: 'Navigation' },
     };
 

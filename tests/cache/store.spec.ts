@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { STORE_TAGS } from '../../src/data/cache-tags';
 import {
+    warmCache,
+    saveExistingResponse,
     invalidateAndVerifyDeletion,
+    verifyCacheRebuilt,
     verifyNoUnrelatedKeysDeleted,
     getSpotCheckEndpoints,
-    callAndSnapshot,
 } from '../../src/utils/api-helper';
 import { logger } from '../../src/utils/logger';
 
@@ -12,36 +14,42 @@ test.describe('🏬 Store — Cache Invalidation', () => {
     for (const config of STORE_TAGS) {
         test.describe(config.label, () => {
 
-            test(`Invalidation lifecycle for tag="${config.tag}"`, async ({ request }) => {
+            test(`Full cache lifecycle for tag="${config.tag}"`, async ({ request }) => {
                 logger.banner(`STORE CACHE TEST — ${config.label}`);
 
-                // NOTE: No direct functional endpoint for store-inventory available.
-                // We test invalidation success and no unrelated key deletion.
+                // ── STEP 1: Warm the cache ──
+                logger.separator('STEP 1 — Warm the Cache');
+                const warmSnapshots = await warmCache(request, config.endpoints);
+                expect(warmSnapshots.length).toBeGreaterThan(0);
+                logger.pass('Cache warmed successfully');
 
-                // ── STEP 1: Pre-check — Snapshot unrelated modules ──
-                logger.separator('STEP 1 — Pre-check Unrelated Modules');
-                const spotChecks = getSpotCheckEndpoints('store');
-                const preSnapshots: { path: string; label: string; body: unknown }[] = [];
-                for (const check of spotChecks) {
-                    const snap = await callAndSnapshot(request, check.path);
+                // ── STEP 2: Save existing response ──
+                logger.separator('STEP 2 — Save Existing Response');
+                const cachedSnapshots = await saveExistingResponse(request, config.endpoints);
+                for (const snap of cachedSnapshots) {
                     expect(snap.status).toBe(200);
-                    preSnapshots.push({ ...check, body: snap.body });
-                    logger.pass(`Pre-check OK: ${check.label}`);
+                    logger.info(`Cached response: ${snap.url} → ${snap.durationMs}ms`);
                 }
 
-                // ── STEP 2: Call Invalidate API (double-call: deletedKeys > 0, then 0) ──
-                logger.separator('STEP 2 — Call Invalidate API & Verify deletedKeys');
+                // ── STEP 3: Call Invalidate API (double-call: deletedKeys > 0, then 0) ──
+                logger.separator('STEP 3 — Call Invalidate API & Verify deletedKeys');
                 const invalidation = await invalidateAndVerifyDeletion(request, config.tag);
                 logger.pass(`Invalidation verified — 1st call deleted keys, 2nd call deleted 0`);
 
-                // ── STEP 3: Verify no unrelated keys deleted ──
-                logger.separator('STEP 3 — Verify No Unrelated Keys Deleted');
-                for (const pre of preSnapshots) {
-                    const post = await callAndSnapshot(request, pre.path);
-                    expect(post.status).toBe(200);
-                    expect(post.body, `${pre.label} data should be unchanged after store invalidation`).toEqual(pre.body);
-                    logger.pass(`Unrelated module intact: ${pre.label}`);
-                }
+                // ── STEP 4: Verify keys deleted (indirect) ──
+                logger.separator('STEP 4 — Verify Keys Deleted (Indirect)');
+                logger.info('Re-calling API to confirm cache purge and rebuild');
+
+                // ── STEP 5: Verify cache rebuilt ──
+                logger.separator('STEP 5 — Verify Cache Rebuilt');
+                await verifyCacheRebuilt(request, config.endpoints, cachedSnapshots);
+                logger.pass('Cache rebuilt — data matches pre-invalidation snapshot');
+
+                // ── STEP 6: Verify no unrelated keys deleted ──
+                logger.separator('STEP 6 — Verify No Unrelated Keys Deleted');
+                const spotChecks = getSpotCheckEndpoints('store');
+                await verifyNoUnrelatedKeysDeleted(request, 'store', spotChecks);
+                logger.pass('No unrelated keys affected');
 
                 logger.banner('STORE CACHE TEST — PASSED ✅');
             });
